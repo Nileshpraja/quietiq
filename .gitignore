@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+downloads/
+site/assets/face_mesh/*
+site/assets/face_detection/*
+site/assets/onnx/*
+site/assets/vad/*
+!site/assets/face_mesh/.keep
+!site/assets/face_detection/.keep
+!site/assets/onnx/.keep
+!site/assets/vad/.keep
+*.sqlite3
+*.webm
+*.mp4
+*.wav
+*.ogg
+.DS_Store

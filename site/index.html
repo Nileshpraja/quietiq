@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#080705">
+  <meta name="description" content="QuietIQ — a cinematic STEM classroom monitoring demonstration using local browser AI.">
+  <title>QuietIQ — Public Web Edition</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/branding/quietiq-logo.svg">
+  <link rel="stylesheet" href="./css/style.css?v=audio-frame-fix-1">
+  <link rel="stylesheet" href="./css/reference-theme.css?v=audio-frame-fix-1">
+  <script defer src="./assets/face_detection/face_detection.js"></script>
+  <script defer src="./assets/face_mesh/face_mesh.js"></script>
+  <script defer src="./assets/onnx/ort.wasm.min.js"></script>
+  <script defer src="./assets/vad/bundle.min.js"></script>
+  <script type="module" src="./js/app.js?v=audio-frame-fix-1"></script>
+</head>
+<body data-theme="dark">
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+  <div class="ambient-aura ambient-left" aria-hidden="true"></div>
+  <div class="ambient-aura ambient-right" aria-hidden="true"></div>
+  <div id="scrollProgress" class="scroll-progress" aria-hidden="true"></div>
+  <div id="audioRecordingBanner" class="audio-recording-banner" role="status" aria-live="polite" hidden>
+    <span class="rec-dot" aria-hidden="true"></span> AUDIO RECORDING ACTIVE • Everyone in microphone range must have consented <span id="recordingBannerTime">00:00</span>
+  </div>
+
+  <header class="site-nav" id="siteNav">
+    <a class="site-wordmark" href="#home" aria-label="QuietIQ home">QUIET<span>IQ</span></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#home" class="nav-link active">Home</a>
+      <a href="#problem" class="nav-link">Problem</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#recordings" class="nav-link">Audio Library</a>
+      <a href="#launch" class="nav-link nav-launch-cta">Launch <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="nav-utilities">
+      <button type="button" class="utility-button" id="themeToggleBtn" aria-label="Switch to light mode" title="Toggle light/dark mode">☀</button>
+      <button type="button" class="utility-button" id="fullscreenBtn" title="Toggle presentation fullscreen">⛶</button>
+    </div>
+  </header>
+
+  <main id="siteMain">
+    <section class="cinematic-hero" id="home" aria-labelledby="heroTitle">
+      <div class="hero-light-sweep" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="hero-kicker reveal-ready">SMART CLASSROOM TECHNOLOGY</p>
+        <h1 id="heroTitle" class="hero-title reveal-ready">QUIET<span>IQ</span></h1>
+        <p class="hero-description reveal-ready">A privacy-conscious STEM experiment exploring real-time sound and face landmarks.<br class="desktop-break"> All processing stays in this browser.</p>
+        <div class="hero-waveform reveal-ready" role="img" aria-label="Decorative animated gold audio waveform">
+        <span style="--bar-height:17px; --bar-delay:-0.00s" aria-hidden="true"></span>
+        <span style="--bar-height:34px; --bar-delay:-0.91s" aria-hidden="true"></span>
+        <span style="--bar-height:23px; --bar-delay:-0.13s" aria-hidden="true"></span>
+        <span style="--bar-height:58px; --bar-delay:-1.04s" aria-hidden="true"></span>
+        <span style="--bar-height:38px; --bar-delay:-0.26s" aria-hidden="true"></span>
+        <span style="--bar-height:75px; --bar-delay:-1.17s" aria-hidden="true"></span>
+        <span style="--bar-height:29px; --bar-delay:-0.39s" aria-hidden="true"></span>
+        <span style="--bar-height:46px; --bar-delay:-1.30s" aria-hidden="true"></span>
+        <span style="--bar-height:20px; --bar-delay:-0.52s" aria-hidden="true"></span>
+        <span style="--bar-height:32px; --bar-delay:-1.43s" aria-hidden="true"></span>
+        <span style="--bar-height:15px; --bar-delay:-0.65s" aria-hidden="true"></span>
+        <span style="--bar-height:40px; --bar-delay:-1.56s" aria-hidden="true"></span>
+        <span style="--bar-height:22px; --bar-delay:-0.78s" aria-hidden="true"></span>
+        <span style="--bar-height:63px; --bar-delay:-0.00s" aria-hidden="true"></span>
+        <span style="--bar-height:34px; --bar-delay:-0.91s" aria-hidden="true"></span>
+        <span style="--bar-height:53px; --bar-delay:-0.13s" aria-hidden="true"></span>
+        <span style="--bar-height:27px; --bar-delay:-1.04s" aria-hidden="true"></span>
+        <span style="--bar-height:76px; --bar-delay:-0.26s" aria-hidden="true"></span>
+        <span style="--bar-height:41px; --bar-delay:-1.17s" aria-hidden="true"></span>
+        <span style="--bar-height:22px; --bar-delay:-0.39s" aria-hidden="true"></span>
+        <span style="--bar-height:34px; --bar-delay:-1.30s" aria-hidden="true"></span>
+        </div>
+        <div class="hero-mini-actions reveal-ready">
+          <a class="hero-launch-link launch-button" id="launchQuietIQBtn" href="#launch" aria-label="Launch QuietIQ dashboard">
+            <span class="launch-button-shine" aria-hidden="true"></span>
+            <span class="launch-button-icon" aria-hidden="true">▶</span>
+            <span>LAUNCH QUIETIQ</span>
+            <span class="launch-button-arrow" aria-hidden="true">↗</span>
+          </a>
+          <label class="sound-option"><input type="checkbox" id="introSoundCheck"> Intro sound</label>
+        </div>
+        <p class="hero-launch-hint reveal-ready">Go straight to the live AI dashboard. Camera and microphone access is requested only when you start the monitor.</p>
+      </div>
+      <a class="scroll-cue" href="#problem"><span>SCROLL TO EXPLORE</span><i aria-hidden="true"></i></a>
+    </section>
+
+    <section class="story-section problem-section" id="problem" aria-labelledby="problemTitle">
+      <div class="section-content">
+        <div class="section-heading fade-reveal">
+          <span class="section-ordinal">01 / THE CHALLENGE</span>
+          <h2 id="problemTitle">The Problem</h2>
+          <p>Why classroom noise matters</p>
+        </div>
+        <div class="problem-card fade-reveal">
+          <div class="problem-card-text">
+            <p class="section-overline">THE BIG PICTURE</p>
+            <h3>Problem Statement</h3>
+            <p>Classroom noise can make it difficult for students to concentrate and for teachers to communicate effectively. In a busy classroom, understanding patterns of sound and activity is challenging.</p>
+            <p>QuietIQ explores how <strong>local speech detection</strong>, <strong>face landmarks</strong>, and <strong>responsible activity summaries</strong> can support a supervised STEM demonstration.</p>
+            <a href="#features" class="text-link">Explore the technology <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="problem-art" aria-hidden="true">
+            <div class="problem-orbit orbit-one"></div>
+            <div class="problem-orbit orbit-two"></div>
+            <div class="problem-orbit orbit-three"></div>
+            <div class="problem-art-center"><span>Q</span></div>
+            <span class="orbit-dot orbit-dot-a"></span><span class="orbit-dot orbit-dot-b"></span><span class="orbit-dot orbit-dot-c"></span>
+          </div>
+        </div>
+        <p class="ethical-note fade-reveal">QuietIQ is a consent-based prototype. Its possible-speaker highlights are estimates, not evidence of who spoke or behaved incorrectly.</p>
+      </div>
+    </section>
+
+    <section class="story-section features-section" id="features" aria-labelledby="featuresTitle">
+      <div class="section-content">
+        <div class="section-heading fade-reveal">
+          <span class="section-ordinal">02 / THE TECHNOLOGY</span>
+          <h2 id="featuresTitle">Intelligence, Refined.</h2>
+          <p>Four systems. One cohesive experience.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card fade-reveal"><span class="feature-number">01</span><div class="feature-glyph" aria-hidden="true">◎</div><h3>Visual Awareness</h3><p>MediaPipe Face Mesh tracks multiple visible faces and observes lip movements in the browser.</p><span class="feature-foot">FACE MESH</span></article>
+          <article class="feature-card fade-reveal"><span class="feature-number">02</span><div class="feature-glyph" aria-hidden="true">≋</div><h3>Speech Intelligence</h3><p>Silero VAD analyzes your selected USB microphone to detect speech activity—not speaker identity.</p><span class="feature-foot">SILERO VAD</span></article>
+          <article class="feature-card fade-reveal"><span class="feature-number">03</span><div class="feature-glyph" aria-hidden="true">◇</div><h3>Live Visualizations</h3><p>Colored tracking boxes, a live audio chart, and readable controls turn sensor signals into a demonstration.</p><span class="feature-foot">REAL-TIME UI</span></article>
+          <article class="feature-card fade-reveal"><span class="feature-number">04</span><div class="feature-glyph" aria-hidden="true">⌁</div><h3>Browser-First Privacy</h3><p>The public website processes microphone and camera data on your device; consented clips are stored in this browser, never uploaded to QuietIQ.</p><span class="feature-foot">BROWSER ONLY</span></article>
+        </div>
+        <div class="feature-bottom fade-reveal"><span class="thin-line"></span><p>Designed for a STEM project, not automated student discipline.</p><span class="thin-line"></span></div>
+      </div>
+    </section>
+
+    <section class="launch-section" id="launch" aria-labelledby="launchTitle">
+      <div class="section-content">
+        <div class="section-heading fade-reveal">
+          <span class="section-ordinal">03 / YOUR CONTROL ROOM</span>
+          <h2 id="launchTitle">Launch QuietIQ</h2>
+          <p>Now experience the real AI classroom monitor</p>
+        </div>
+        <p class="ethical-note fade-reveal"><strong>Public demo, private data:</strong> QuietIQ runs its AI in your browser. Aggregate history and consented audio recordings remain in this browser profile on your device; they are not uploaded to the website host. Do not record students without appropriate consent and school approval.</p>
+        <div class="launch-status fade-reveal">
+          <div><span class="status-light"></span><strong id="serverState">PUBLIC WEB DEMO</strong><span class="launch-status-separator"></span><span>Browser-only AI • no monitoring server</span></div>
+          <div class="launch-toolbar">
+            <button id="exportReportBtn" class="button secondary report-button" type="button">▤ Export PDF report</button>
+            <a class="button secondary" href="#home">↑ Back to top</a>
+          </div>
+        </div>
+      </div>
+  <div class="layout dashboard-grid">
+    <section class="panel controls glass-soft" aria-labelledby="setupHeading">
+      <div class="section-head"><h2 id="setupHeading">1. Select your USB webcam + microphone</h2><span class="pill">Device setup</span></div>
+      <p class="intro">Choose the webcam for video and its USB microphone for audio. Avoid the laptop's Realtek microphone if it still isn't working.</p>
+      <div class="device-grid">
+        <label>Camera (video)
+          <select id="cameraSelect" aria-label="Camera device"><option value="">Click Find devices</option></select>
+        </label>
+        <label>Microphone (audio)
+          <select id="micSelect" aria-label="Microphone device"><option value="">Click Find devices</option></select>
+        </label>
+      </div>
+      <div class="performance-config">
+        <label for="performancePreset"><strong>AI Performance Preset</strong>
+          <select id="performancePreset" aria-label="Choose AI performance preset">
+            <option value="smooth" selected>Smooth — older laptop (2 detailed faces)</option>
+            <option value="balanced">Balanced — 5 detailed faces</option>
+            <option value="detail">High detail — fast laptop (5 detailed faces)</option>
+          </select>
+        </label>
+        <p class="info" id="performancePresetHelp" role="status">Best for weak laptops: 640×360 camera, 2 detailed faces, about 6 AI frame attempts/second. Wide scan unavailable.</p>
+        <p class="info performance-warning" id="performanceLiveStatus">Performance: choose a preset, then start the camera. To change it, stop and restart the session.</p>
+      </div>
+      <label class="consent" style="margin:12px 0"><input type="checkbox" id="performanceMode" checked> Smooth AI mode: pause heavy decorative animations while monitoring (recommended)</label>
+      <div class="actions">
+        <button class="button secondary" id="scanBtn">Find devices + allow access</button>
+        <button class="button primary" id="startBtn">Start camera + AI mic</button>
+        <button class="button secondary" id="stopBtn" disabled>Stop everything</button>
+      </div>
+      <label class="audio-input-mode" for="micProcessingMode"><strong>Microphone processing</strong>
+          <select id="micProcessingMode" aria-label="Microphone processing">
+            <option value="filtered" selected>Filtered (default; less background noise)</option>
+            <option value="natural">Less filtering (test if quiet voices are missed)</option>
+          </select>
+        </label>
+        <p class="info">Change microphone processing <strong>before</strong> starting the camera. Less filtering may also pick up more background noise.</p>
+        <p class="selection" id="chosenDevices">Not started. Camera and microphone permissions will be requested.</p>
+    </section>
+
+    <section class="stats" aria-label="Live system status">
+      <article class="stat glass-soft"><span>Visible faces (estimate)</span><strong id="faceCount">0</strong><small>Classroom overview: up to 40 boxes</small></article>
+      <article class="stat glass-soft"><span>AI speech</span><strong id="speechLabel">Not started</strong><small id="vadState">AI model not loaded</small></article>
+      <article class="stat glass-soft"><span>Possible speakers</span><strong id="speakerCount">0</strong><small>Estimate, not identification</small></article>
+      <article class="stat glass-soft"><span>Sound level</span><strong id="volumeLabel">0</strong><small>Relative scale 0–100, not dB</small></article>
+    </section>
+
+    <section class="panel camera-panel feature-panel glass-soft">
+      <div class="section-head"><h2>2. Classroom overview + MediaPipe Face Mesh</h2><div class="camera-controls"><button type="button" id="mirrorCameraBtn" class="button secondary mirror-camera-button" aria-pressed="true" title="Flip the webcam preview horizontally">↔ Mirror Camera: ON</button><span id="faceState" class="pill">Face AI: off</span></div></div>
+      <div class="camera-stage" id="cameraStage">
+        <span class="hud-corner hud-tl" aria-hidden="true"></span>
+        <span class="hud-corner hud-tr" aria-hidden="true"></span>
+        <span class="hud-corner hud-bl" aria-hidden="true"></span>
+        <span class="hud-corner hud-br" aria-hidden="true"></span>
+        <div class="hud-status" id="hudStatus">● STANDBY • LOCAL</div>
+        <div class="hud-tech" aria-hidden="true">FACE MESH / OPTIONAL CROWD SCAN / SILERO</div>
+        <div class="hud-sweep" aria-hidden="true"></div>
+        <video id="camera" autoplay muted playsinline></video>
+        <canvas id="faceOverlay"></canvas>
+        <div class="camera-placeholder" id="cameraPlaceholder"><span class="placeholder-icon">◈</span><strong>Camera preview appears here</strong><small>Click Start camera + AI mic</small></div>
+        <div id="captureIndicator" class="capture-indicator" hidden>● DEMO PHOTO CAPTURE ACTIVE</div>
+      </div>
+      <div class="wide-scan-controls" aria-label="Optional classroom-wide detector controls">
+        <label class="consent wide-scan-switch" for="wideScanEnabled">
+          <input type="checkbox" id="wideScanEnabled">
+          <span><strong>Try 40-face classroom scan</strong><small>Experimental • OFF by default; available in Balanced/Detail mode only. Face Mesh, speech AI, photos and the audio library work without it.</small></span>
+        </label>
+        <label class="wide-scan-model" for="wideScanModel">Detection distance
+          <select id="wideScanModel">
+            <option value="full" selected>Whole classroom (up to ~5 m)</option>
+            <option value="short">Near camera (up to ~2 m)</option>
+          </select>
+        </label>
+        <p id="wideScanHelp" class="wide-scan-help" role="status" aria-live="polite">Classroom scan is OFF. Five-face lip tracking remains available. Turn the scan on only if you need a wider face count.</p>
+      </div>
+      <div class="classroom-diagnostics" aria-label="Classroom scan details">
+        <span class="pill" id="crowdState">Classroom detector: not started</span>
+        <span class="pill" id="meshTrackedCount">Lip landmarks: 0 / 5 faces</span>
+        <span class="pill" id="crowdFrameCount">Classroom scans: 0</span>
+        <span class="pill" id="crowdLatency">Scan time: —</span>
+      </div>
+      <p class="info">Optional classroom scan can display up to <strong>40 face detections</strong> when enabled and supported on this laptop; the default stable mode tracks up to five faces. All students must be visible, well-lit, and large enough in the camera frame. Face Mesh can estimate lip motion for only a subset; one USB microphone cannot reliably locate speech among 29 students.</p>
+      <p class="legend"><span class="dot green"></span> Face tracked <span class="dot red"></span> Possible speaker <span class="dot gold"></span> Mouth movement test <span class="legend-note">When the optional classroom scan is ON, extra green boxes come from MediaPipe Face Detection (up to 40 display slots); when OFF, Face Mesh tracks up to five faces in Balanced/Detail mode (two in Smooth mode). Red boxes are only possible-speaker estimates. Camera mirror stays aligned.</span></p>
+    </section>
+
+    <section class="panel audio-panel feature-panel glass-soft">
+      <div class="section-head"><h2>3. Microphone / speech AI</h2><span id="audioState" class="pill">Microphone: off</span></div>
+      <div class="chart-heading"><span class="chart-title">SIGNAL ANALYSIS <span class="chart-indicator">LIVE DATA</span></span><small>Relative audio activity • recent samples</small></div>
+      <canvas id="noiseCanvas" width="640" height="176" aria-label="Relative microphone noise activity chart"></canvas>
+      <div class="speech-details"><span>Microphone input level</span><div class="meter"><div id="levelFill"></div></div><output id="levelOut">0 / 100</output></div>
+      <div class="mic-diagnostics">
+        <div class="diagnostic-line"><span>Microphone track</span><strong id="micTrackState">Not started</strong></div>
+        <div class="diagnostic-line"><span>Voice test / troubleshooting</span><strong id="audioHealth" role="status" aria-live="polite">Start the camera + AI mic to test talking detection.</strong></div>
+        <div class="diagnostic-line"><span>Microphone audio engine</span><strong id="vadAudioContextState">Not started</strong></div>
+        <div class="diagnostic-line"><span>Silero input route</span><strong id="vadProcessorState">Not started</strong></div>
+        <div class="actions"><button class="button secondary" type="button" id="retrySpeechBtn" disabled>Retry speech AI (compatibility mode)</button></div>
+        <p class="info">If microphone sound moves but Silero frames stay at zero, QuietIQ automatically changes to a compatible audio processor after a few seconds. This button lets you retry it manually without stopping the camera.</p>
+        <div class="diagnostic-line"><span>Silero audio frames processed</span><strong id="vadFrameCount">0</strong></div>
+        <div class="diagnostic-line"><span>Speech AI probability (live)</span><strong id="vadProbability">0%</strong></div>
+        <div class="diagnostic-line"><span>Highest speech score (recent 3-second window)</span><strong id="vadPeakScore">0%</strong></div>
+        <div class="meter"><div id="vadProbabilityFill"></div></div>
+        <div class="diagnostic-line"><span>Face Mesh frames processed (lip-tracking subset)</span><strong id="faceFrameCount">0</strong></div>
+        <div class="diagnostic-line"><span>Face Mesh processing time</span><strong id="faceLatency">Not started</strong></div>
+        <div class="diagnostic-line"><span>Current mouth opening ratio</span><strong id="mouthOpening">0.000</strong></div>
+        <div class="diagnostic-line"><span>Lip motion (last ~0.6 second)</span><strong id="lipMotion">0 / 100</strong></div>
+        <div class="diagnostic-line"><span>Red box explanation</span><strong id="speakerGateReason">Waiting for camera</strong></div>
+        <label class="sensitivity-control" for="lipThreshold">Mouth-motion sensitivity (lower = easier to trigger)
+          <input type="range" id="lipThreshold" min="0.04" max="0.25" step="0.01" value="0.08">
+          <output id="lipThresholdValue">0.08</output>
+        </label>
+        <label class="consent"><input type="checkbox" id="showMouthTest"> Show mouth-motion test (yellow boxes without requiring speech; no photos)</label>
+        <p class="info"><strong>Try this:</strong> enable the mouth-motion test, face the webcam, then open and close your mouth. Yellow means lip movement is being measured. Next, speak normally: with Silero saying Detected, a red <em>Possible speaker</em> box may appear.</p>
+        <label class="sensitivity-control" for="speechSensitivity">Speech sensitivity threshold
+          <input type="range" id="speechSensitivity" min="0.25" max="0.70" step="0.05" value="0.40">
+          <output id="sensitivityValue">0.40</output>
+        </label>
+        <p class="info"><strong>Recommended:</strong> Start at <strong>0.40</strong>. Increase to 0.45–0.55 after it detects your voice reliably; 0.60 may miss quieter speech. This slider affects Silero speech decisions, not the microphone input volume.</p>
+      </div>
+      <p class="info">Silero VAD detects the presence of human speech. It does not identify a speaker; lip movement is used for the tentative red-box estimate.</p>
+    </section>
+
+    <section class="panel absence-panel glass-soft">
+      <div class="section-head"><h2>4. Teacher Absence Mode</h2><span class="pill warning" id="modeLabel">OFF</span></div>
+      <p>For supervised STEM demos only. This switch <strong>does not detect whether a teacher is present</strong>. Consented photo capture and optional microphone recording have separate permission controls. Audio recording is never hidden or started automatically.</p>
+      <label class="consent"><input type="checkbox" id="consentCheck"> I confirm that all visible participants have agreed to this demonstration and photography.</label>
+      <div class="actions"><button id="modeBtn" class="button danger" disabled>Turn demo mode ON</button><button id="manualPhotoBtn" class="button secondary" disabled>Take consented test snapshot</button><button id="clearPhotosBtn" class="button secondary">Delete all snapshots</button></div>
+      <div class="diagnostic-line"><span>Snapshot status</span><strong id="snapshotStatus" role="status" aria-live="polite">Turn on consented demo mode to enable capture</strong></div>
+      <div class="diagnostic-line"><span>Photos captured this session</span><strong id="snapshotCount">0</strong></div>
+      <p class="info">Automatic photos require one possible speaker, brief matching speech + lip motion, your consent confirmation, and the visible ON mode. Try <strong>Take consented test snapshot</strong> to check that your webcam can capture a photo. With several faces, use the test button only when one consenting volunteer is visible.</p>
+      <p class="info">Snapshots are stored only in this browser tab's memory, never sent to Python or automatically saved to disk. They disappear on Stop or reload. To keep a photo, click its Download button.</p>
+      <div class="photo-grid" id="photos"><p class="empty">No demonstration snapshots yet.</p></div>
+    </section>
+
+    <section class="panel audio-library-panel glass-soft" id="recordings" aria-labelledby="recordingsTitle">
+      <div class="section-head"><h2 id="recordingsTitle">5. Teacher Audio Recording &amp; Playback Library</h2><span class="pill" id="audioRecordingPill">RECORDING OFF</span></div>
+      <p class="info"><strong>Audio recordings are optional.</strong> QuietIQ will never record just because Teacher Absence Mode is ON. Recording requires a live USB microphone, explicit permission, Teacher Absence Mode ON, and your separate Start Recording click. The audio includes <strong>everything audible to the microphone</strong> while recording, not only AI-detected speech. It cannot identify who spoke.</p>
+      <label class="consent audio-consent"><input id="audioConsentCheck" type="checkbox"> I confirm every person within microphone range has been informed and has given the required permission for audio recording and later teacher playback, including any required school/guardian approval.</label>
+      <div class="actions">
+        <button id="audioStartBtn" class="button primary" disabled type="button">● Start audio recording</button>
+        <button id="audioStopBtn" class="button secondary" disabled type="button">■ Stop &amp; save</button>
+        <button id="refreshRecordingsBtn" class="button secondary" type="button">↻ Refresh library</button>
+        <button id="deleteAllRecordingsBtn" class="button secondary" type="button">Delete all audio clips</button>
+      </div>
+      <div class="diagnostic-line"><span>Recording status</span><strong id="audioRecordStatus" role="status" aria-live="polite">Recording OFF</strong></div>
+      <div class="diagnostic-line"><span>Current recording duration</span><strong id="audioRecordTimer" aria-live="off">00:00</strong></div>
+      <p class="info">Clips are limited to <strong>5 minutes each</strong>, saved only in <strong>this browser’s local storage on this device</strong>, with a 30-day cleanup policy (your browser may clear them sooner). For longer retention, use Download. Playback remains available when you reopen this website in the same browser profile, provided browser data has not been cleared. No cloud upload, transcription, or account login is included.</p>
+      <a id="failedAudioDownload" href="#" class="button secondary audio-backup-link" hidden>Download unsaved backup clip</a>
+      <div class="library-heading"><h3>Saved teacher playback clips <span id="savedRecordingCount">0</span></h3><p>Keep this browser profile private; recordings are not password-protected. Use headphones for playback.</p></div>
+      <div id="recordingsList" class="audio-clip-list"><p class="empty">Checking the local recording library…</p></div>
+    </section>
+
+    <section class="panel history-panel glass-soft">
+      <div class="section-head"><h2>6. Activity history</h2><span class="pill">Local browser storage • no names</span></div>
+      <div class="actions"><button type="button" class="button secondary" id="downloadCsvBtn">Download CSV</button><button id="clearHistoryBtn" class="button secondary">Clear history</button></div>
+      <div class="scroll"><table><thead><tr><th>Time (local)</th><th>Event</th><th>Faces</th><th>Possible speakers</th><th>Sound</th></tr></thead><tbody id="historyBody"><tr><td colspan="5" class="empty">No activity recorded.</td></tr></tbody></table></div>
+    </section>
+
+    <section class="panel notes glass-soft">
+      <h2>Status / troubleshooting</h2>
+      <p id="assetsState" class="info">Checking local Face Mesh and Silero AI assets...</p>
+      <p class="info">Public website • HTTPS • Browser-local AI models and recordings • No remote audio storage</p>
+      <p id="message" role="status" aria-live="polite">Ready. Find devices first.</p>
+      <p class="info">AI models are downloaded and hosted as static website files. No Python server is needed to use this public version. Use an HTTPS address and allow camera/microphone access when prompted. Wide-classroom scanning is experimental and OFF by default.</p>
+    </section>
+  </div>
+
+    </section>
+  </main>
+
+
+  <div id="reportOverlay" class="report-overlay" role="dialog" aria-label="QuietIQ printable activity report" aria-modal="true" hidden>
+    <div class="report-toolbar no-print">
+      <strong>QuietIQ • Project report preview</strong>
+      <div class="report-actions">
+        <button type="button" id="printReportBtn" class="button primary">Print / Save as PDF</button>
+        <button type="button" id="closeReportBtn" class="button secondary">Close preview</button>
+      </div>
+    </div>
+    <article id="reportSheet" class="report-sheet" aria-live="polite"></article>
+  </div>
+  <footer>QuietIQ public STEM demo • No face identification • All audio/video processed in the browser • Recordings remain on this device only after explicit consent and visible Start Recording • No hidden monitoring • <a href="./third-party.html" style="color:inherit">Third-party credits</a></footer>
+</body>
+</html>
